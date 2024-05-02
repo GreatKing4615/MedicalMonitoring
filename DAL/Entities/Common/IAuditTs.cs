@@ -2,6 +2,6 @@
 
 public interface IAuditTs
 {
-    public DateTime UpdateTs { get;}
+    public DateTime? UpdateTs { get;}
     public DateTime CreateTs { get;}
 }

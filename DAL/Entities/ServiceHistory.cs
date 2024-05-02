@@ -9,6 +9,6 @@ public class ServiceHistory : IAuditTs
     public DateTime FixTime { get; set; }
     public MedicalWorker MedicalWorker { get; set; }
     public Failure Failure { get; set; }
-    public DateTime UpdateTs { get; }
+    public DateTime? UpdateTs { get; }
     public DateTime CreateTs { get; }
 }
