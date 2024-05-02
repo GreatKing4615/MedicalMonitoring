@@ -5,6 +5,10 @@ VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MedicalMonitoring", "MedicalMonitoring\MedicalMonitoring.csproj", "{9E9448BC-FCFB-41A8-AC63-A9FF12E10B90}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAL", "DAL\DAL.csproj", "{8B44861C-5906-4C09-988C-B88BB92A9823}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BL", "BL\BL.csproj", "{258DD356-A03C-4E2C-A152-748B9752F031}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{9E9448BC-FCFB-41A8-AC63-A9FF12E10B90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9E9448BC-FCFB-41A8-AC63-A9FF12E10B90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9E9448BC-FCFB-41A8-AC63-A9FF12E10B90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B44861C-5906-4C09-988C-B88BB92A9823}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B44861C-5906-4C09-988C-B88BB92A9823}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B44861C-5906-4C09-988C-B88BB92A9823}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B44861C-5906-4C09-988C-B88BB92A9823}.Release|Any CPU.Build.0 = Release|Any CPU
+		{258DD356-A03C-4E2C-A152-748B9752F031}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{258DD356-A03C-4E2C-A152-748B9752F031}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{258DD356-A03C-4E2C-A152-748B9752F031}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{258DD356-A03C-4E2C-A152-748B9752F031}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
