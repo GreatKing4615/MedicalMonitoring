@@ -33,6 +33,8 @@ builder.Services.AddScoped<IResearchHistoryService, ResearchHistoryService>();
 builder.Services.AddScoped<IServiceHistoryService, ServiceHistoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
+builder.Services.AddScoped<IPredictionService, PredictionService>();
+
 
 // Register AutoMapper
 builder.Services.AddAutoMapper(typeof(Program));

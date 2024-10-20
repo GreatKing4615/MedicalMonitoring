@@ -8,7 +8,7 @@ namespace DAL.Entities
         public string Login { get; set; }
         public Role Role { get; set; }
         public DateTimeOffset CreateDate { get; set; }
-        public DateTimeOffset DeleteDate { get; set;}
+        public DateTimeOffset? DeleteDate { get; set;}
         public List<ServiceHistory> History { get; set; }
     }
 }

@@ -13,6 +13,10 @@ namespace MedicalMonitoring.MappingProfile
             CreateMap<User, UserDto>().ReverseMap();
             CreateMap<ResearchHistory, ResearchHistoryDto>().ReverseMap();
             CreateMap<ServiceHistory, ServiceHistoryDto>().ReverseMap();
+
+            CreateMap<ResearchHistory, PatientFlowData>()
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.ResearchDate.Date))
+                .ForMember(dest => dest.PatientCount, opt => opt.MapFrom(src => 1));
         }
     }
 

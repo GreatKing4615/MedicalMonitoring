@@ -11,7 +11,7 @@ namespace DAL.Entities
         public DateTimeOffset CreateTs { get; set; }
         public DateTimeOffset? UpdateTs { get; set; }
         public DateTimeOffset BeginDate { get; set; }
-        public DateTimeOffset EndDate { get; set; }
+        public DateTimeOffset? EndDate { get; set; }
         public List<ServiceHistory> ServiceHistory { get; set; } = new();
         public List<ResearchHistory> ResearchHistory { get; set; } = new();
     }
