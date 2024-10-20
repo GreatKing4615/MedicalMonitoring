@@ -1,17 +1,18 @@
-﻿using DAL.Entities.Common;
+﻿using DAL.Enums;
 
-namespace DAL.Entities;
-
-public class Device : IAuditTs
+namespace DAL.Entities
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string Model { get; set; }
-    public int DeviceTypeId { get; set; }
-    public DeviceType DeviceType { get; set; }
-    public List<ServiceHistory> History { get; set; }
-    public DeviceStatus Status { get; set; }
-    public DateTime LastServiceTs { get; set; }
-    public DateTime? UpdateTs { get; }
-    public DateTime CreateTs { get; }
+    public class Device
+    {
+        public int Id { get; set; }
+        public string ModelName { get; set; }
+        public DeviceType Type { get; set; }
+        public DeviceStatus Status { get; set; }
+        public DateTimeOffset CreateTs { get; set; }
+        public DateTimeOffset? UpdateTs { get; set; }
+        public DateTimeOffset BeginDate { get; set; }
+        public DateTimeOffset EndDate { get; set; }
+        public List<ServiceHistory> ServiceHistory { get; set; } = new();
+        public List<ResearchHistory> ResearchHistory { get; set; } = new();
+    }
 }

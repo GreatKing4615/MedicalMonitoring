@@ -5,13 +5,11 @@ namespace DAL;
 
 public class MonitoringContext: DbContext
 {
-    public DbSet<DeviceType> DeviceTypes { get; set; }
-    public DbSet<Specialization> Specializations { get; set; }
-    public DbSet<Failure> Failures { get; set; }
+    public DbSet<User> Users { get; set; }
     public DbSet<Research> Researches { get; set; }
     public DbSet<Device> Devices { get; set; }
-    public DbSet<MedicalWorker> MedicalWorkers { get; set; }
-    public DbSet<ServiceHistory> ServiceHistory { get; set; }
+    public DbSet<ServiceHistory> ServiceHistories { get; set; }
+    public DbSet<ResearchHistory> ResearchHistories { get; set; }
 
 
     public MonitoringContext(DbContextOptions<MonitoringContext> options)
@@ -22,51 +20,6 @@ public class MonitoringContext: DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        #region DeviceType
-        modelBuilder.Entity<DeviceType>()
-            .HasKey(e => e.Id);
-
-        modelBuilder.Entity<DeviceType>()
-            .Property(x=>x.UpdateTs)
-            .ValueGeneratedOnUpdate()
-            .HasDefaultValueSql("now()");
-
-        modelBuilder.Entity<DeviceType>()
-            .Property(x => x.CreateTs)
-            .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("now()");
-        #endregion
-
-        #region Specialization
-        modelBuilder.Entity<Specialization>()
-            .HasKey(e => e.Id);
-
-        modelBuilder.Entity<Specialization>()
-            .Property(x => x.UpdateTs)
-            .ValueGeneratedOnUpdate()
-            .HasDefaultValueSql("now()");
-
-        modelBuilder.Entity<Specialization>()
-            .Property(x => x.CreateTs)
-            .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("now()");
-        #endregion
-
-        #region Failure
-        modelBuilder.Entity<Failure>()
-            .HasKey(e => e.Id);
-
-        modelBuilder.Entity<Failure>()
-            .Property(x => x.UpdateTs)
-            .ValueGeneratedOnUpdate()
-            .HasDefaultValueSql("now()");
-
-        modelBuilder.Entity<Failure>()
-            .Property(x => x.CreateTs)
-            .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("now()");
-        #endregion
-
         #region Device
         modelBuilder.Entity<Device>()
             .HasKey(e => e.Id);
@@ -80,51 +33,30 @@ public class MonitoringContext: DbContext
             .Property(x => x.CreateTs)
             .ValueGeneratedOnAdd()
             .HasDefaultValueSql("now()");
-
-        modelBuilder.Entity<Device>()
-            .HasOne(x=>x.DeviceType)
-            .WithMany(x=>x.Devices)
-            .HasForeignKey(x=>x.DeviceTypeId);
         #endregion
 
-        #region MedicalWorker
-        modelBuilder.Entity<MedicalWorker>()
+        #region User
+        modelBuilder.Entity<User>()
             .HasKey(x => x.Id);
-
-        modelBuilder.Entity<MedicalWorker>()
-            .Property(x => x.UpdateTs)
-            .ValueGeneratedOnUpdate()
-            .HasDefaultValueSql("now()");
-
-        modelBuilder.Entity<MedicalWorker>()
-            .Property(x => x.CreateTs)
-            .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("now()");
-
-        modelBuilder.Entity<MedicalWorker>()
-            .HasOne(x => x.Specialization)
-            .WithMany(x=>x.Workers)
-            .HasForeignKey(x=>x.SpecializationId);
-
         #endregion
 
         #region Research
         modelBuilder.Entity<Research>()
             .HasKey(x => x.Id);
+        #endregion
 
-        modelBuilder.Entity<Research>()
-            .Property(x => x.UpdateTs)
-            .ValueGeneratedOnUpdate()
-            .HasDefaultValueSql("now()");
+        #region ResearchHistory
+        modelBuilder.Entity<ResearchHistory>()
+            .HasKey(x => x.Id);
 
-        modelBuilder.Entity<Research>()
-            .Property(x => x.CreateTs)
-            .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("now()");
+        modelBuilder.Entity<ResearchHistory>()
+            .HasOne(x => x.Research)
+            .WithMany(x => x.History);
 
-        modelBuilder.Entity<Research>()
-            .HasMany(x => x.RequiredDeviceTypes)
-            .WithMany(x => x.Researches);
+        modelBuilder.Entity<ResearchHistory>()
+            .HasOne(x => x.Device)
+            .WithMany(x => x.ResearchHistory);
+
         #endregion
 
         #region ServiceHistory
@@ -132,25 +64,12 @@ public class MonitoringContext: DbContext
             .HasKey(x => x.Id);
 
         modelBuilder.Entity<ServiceHistory>()
-            .Property(x => x.UpdateTs)
-            .ValueGeneratedOnUpdate()
-            .HasDefaultValueSql("now()");
-
-        modelBuilder.Entity<ServiceHistory>()
-            .Property(x => x.CreateTs)
-            .ValueGeneratedOnAdd()
-            .HasDefaultValueSql("now()");
+            .HasOne(x => x.Responsible)
+            .WithMany(x=>x.History);
 
         modelBuilder.Entity<ServiceHistory>()
             .HasOne(x => x.Device)
-            .WithMany(x=>x.History);
-
-        modelBuilder.Entity<ServiceHistory>()
-            .HasOne(x => x.Failure);
-
-        modelBuilder.Entity<ServiceHistory>()
-            .HasOne(x => x.MedicalWorker)
-            .WithMany(x=>x.History);
+            .WithMany(x=>x.ServiceHistory);
         #endregion
     }
 }

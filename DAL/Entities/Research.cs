@@ -1,12 +1,13 @@
-﻿using DAL.Entities.Common;
+﻿using DAL.Enums;
 
-namespace DAL.Entities;
-
-public class Research : IAuditTs
+namespace DAL.Entities
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public List<DeviceType> RequiredDeviceTypes { get; set; } = new ();
-    public DateTime? UpdateTs { get; }
-    public DateTime CreateTs { get; }
+    public class Research
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public DeviceType DeviceType { get; set; }
+        public TimeSpan Duration { get; set; }
+        public List<ResearchHistory> History { get; set; } = new();
+    }
 }

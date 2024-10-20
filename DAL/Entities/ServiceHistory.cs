@@ -1,14 +1,13 @@
-﻿using DAL.Entities.Common;
+﻿using DAL.Enums;
 
-namespace DAL.Entities;
-
-public class ServiceHistory : IAuditTs
+namespace DAL.Entities
 {
-    public int Id { get; set; }
-    public Device Device { get; set; }
-    public DateTime FixTime { get; set; }
-    public MedicalWorker MedicalWorker { get; set; }
-    public Failure Failure { get; set; }
-    public DateTime? UpdateTs { get; }
-    public DateTime CreateTs { get; }
+    public class ServiceHistory
+    {
+        public int Id { get; set; }
+        public Device Device { get; set; }
+        public DateTimeOffset ServiceDate { get; set; }
+        public WorkType WorkType { get; set; }
+        public User Responsible { get; set; }
+    }
 }
