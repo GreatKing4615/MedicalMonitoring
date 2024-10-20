@@ -6,7 +6,7 @@ namespace DAL.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public DeviceType DeviceType { get; set; }
+        public List<DeviceType> DeviceTypes { get; set; }
         public TimeSpan Duration { get; set; }
         public List<ResearchHistory> History { get; set; } = new();
     }

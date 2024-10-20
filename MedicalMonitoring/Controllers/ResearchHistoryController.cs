@@ -1,5 +1,7 @@
-﻿using BL.Services;
+﻿using BL.Dtos;
+using BL.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace MedicalMonitoring.Controllers
 {
@@ -34,5 +36,20 @@ namespace MedicalMonitoring.Controllers
                 return NotFound();
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateResearchHistory([FromBody] ResearchHistoryDto researchHistoryDto)
+        {
+            try
+            {
+                var createdHistory = await _researchHistoryService.CreateResearchHistoryAsync(researchHistoryDto);
+                return CreatedAtAction(nameof(GetResearchHistoryById), new { id = createdHistory.Id }, createdHistory);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
     }
 }

@@ -40,6 +40,7 @@ namespace BL.Dtos
         public DateTimeOffset ServiceDate { get; set; }
         public WorkType WorkType { get; set; }
         public int ResponsibleUserId { get; set; }
+        public int UserId { get; set; }
     }
 }
 

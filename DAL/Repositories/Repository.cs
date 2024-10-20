@@ -7,6 +7,7 @@ namespace DAL.Repositories
     {
         Task<IEnumerable<Device>> GetDevicesAsync(int pageNumber, int pageSize);
         Task<Device> GetDeviceByIdAsync(int id);
+        Task AddDeviceAsync(Device device);
     }
 
     public class DeviceRepository : IDeviceRepository
@@ -30,6 +31,12 @@ namespace DAL.Repositories
         {
             return await _context.Devices.FindAsync(id);
         }
+        public async Task AddDeviceAsync(Device device)
+        {
+            await _context.Devices.AddAsync(device);
+            await _context.SaveChangesAsync();
+        }
+
     }
 
 }

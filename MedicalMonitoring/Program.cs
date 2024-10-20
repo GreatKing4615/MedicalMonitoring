@@ -59,7 +59,9 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<MonitoringContext>();
-    dbContext.Database.GetAppliedMigrations();
+    var migrations = dbContext.Database.GetPendingMigrations();
+    if(migrations.Any())
+        dbContext.Database.Migrate();
 }
 
 app.Run();

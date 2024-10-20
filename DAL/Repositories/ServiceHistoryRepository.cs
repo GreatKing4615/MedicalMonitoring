@@ -7,6 +7,7 @@ namespace DAL.Repositories
     {
         Task<IEnumerable<ServiceHistory>> GetAllAsync(int pageNumber, int pageSize);
         Task<ServiceHistory> GetByIdAsync(int id);
+        Task AddAsync(ServiceHistory serviceHistory);
     }
 
     public class ServiceHistoryRepository : IServiceHistoryRepository
@@ -30,5 +31,11 @@ namespace DAL.Repositories
         {
             return await _context.ServiceHistories.FindAsync(id);
         }
+        public async Task AddAsync(ServiceHistory serviceHistory)
+        {
+            await _context.ServiceHistories.AddAsync(serviceHistory);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

@@ -7,6 +7,7 @@ namespace DAL.Repositories
     {
         Task<IEnumerable<ResearchHistory>> GetAllAsync(int pageNumber, int pageSize);
         Task<ResearchHistory> GetByIdAsync(int id);
+        Task AddAsync(ResearchHistory researchHistory);
     }
 
     public class ResearchHistoryRepository : IResearchHistoryRepository
@@ -30,5 +31,11 @@ namespace DAL.Repositories
         {
             return await _context.ResearchHistories.FindAsync(id);
         }
+        public async Task AddAsync(ResearchHistory researchHistory)
+        {
+            await _context.ResearchHistories.AddAsync(researchHistory);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

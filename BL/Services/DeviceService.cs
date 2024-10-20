@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using BL.Dtos;
+using DAL.Entities;
 using DAL.Repositories;
+using System.ComponentModel.DataAnnotations;
 
 namespace BL.Services
 {
@@ -8,6 +10,7 @@ namespace BL.Services
     {
         Task<IEnumerable<DeviceDto>> GetDevicesAsync(int pageNumber, int pageSize);
         Task<DeviceDto> GetDeviceByIdAsync(int id);
+        Task<DeviceDto> CreateDeviceAsync(DeviceDto deviceDto);
     }
 
     public class DeviceService : IDeviceService
@@ -36,6 +39,25 @@ namespace BL.Services
             }
             return _mapper.Map<DeviceDto>(device);
         }
+        public async Task<DeviceDto> CreateDeviceAsync(DeviceDto deviceDto)
+        {
+            // Business logic: Validate device data
+            if (string.IsNullOrEmpty(deviceDto.ModelName))
+            {
+                throw new ValidationException("ModelName is required.");
+            }
+
+            // Map DTO to entity
+            var device = _mapper.Map<Device>(deviceDto);
+            device.CreateTs = DateTimeOffset.UtcNow;
+
+            // Save to repository
+            await _deviceRepository.AddDeviceAsync(device);
+
+            // Map back to DTO
+            return _mapper.Map<DeviceDto>(device);
+        }
+
     }
 
 }
