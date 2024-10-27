@@ -1,7 +1,5 @@
 using DAL;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using Microsoft.Extensions.DependencyInjection;
 using BL.Services;
 using DAL.Repositories;
 
@@ -18,7 +16,9 @@ builder.Services.AddDbContext<MonitoringContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DataBaseConnectionString") ?? throw new ArgumentNullException("DataBaseConnectionString"),
                       assembly => assembly.MigrationsAssembly(typeof(MonitoringContext).Assembly.FullName));
+    AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 });
+
 
 // Register repositories
 builder.Services.AddScoped<IResearchRepository, ResearchRepository>();
@@ -33,7 +33,11 @@ builder.Services.AddScoped<IResearchHistoryService, ResearchHistoryService>();
 builder.Services.AddScoped<IServiceHistoryService, ServiceHistoryService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
+builder.Services.AddScoped<IPythonPredictionService, PythonPredictionService>();
 builder.Services.AddScoped<IPredictionService, PredictionService>();
+builder.Services.AddScoped<IDataGenerationService, DataGenerationService>();
+builder.Services.AddHttpClient<PythonPredictionService>();
+
 
 
 // Register AutoMapper

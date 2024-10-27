@@ -29,6 +29,12 @@ services:
     networks:
       - monitoring-network
 
+  ml_service:
+    build:
+      context: ./patient_flow_prediction_service
+      dockerfile: patient_flow_prediction_service/Dockerfile
+    ports:
+      - "5000:5000"
 
   prometheus:
     image: prom/prometheus

@@ -1,4 +1,5 @@
 ﻿using DAL.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories
 {
@@ -6,6 +7,8 @@ namespace DAL.Repositories
     {
         Task AddAsync(Research research);
         Task<Research> GetByIdAsync(int id);
+        Task<List<Research>> GetAllResearchesAsync();
+
     }
 
     public class ResearchRepository : IResearchRepository
@@ -27,5 +30,10 @@ namespace DAL.Repositories
         {
             return await _context.Researches.FindAsync(id);
         }
+        public async Task<List<Research>> GetAllResearchesAsync()
+        {
+            return await _context.Researches.ToListAsync();
+        }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DAL.Entities;
+using DAL.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories
@@ -8,6 +9,8 @@ namespace DAL.Repositories
         Task<IEnumerable<Device>> GetDevicesAsync(int pageNumber, int pageSize);
         Task<Device> GetDeviceByIdAsync(int id);
         Task AddDeviceAsync(Device device);
+        Task<List<Device>> GetAllDevicesAsync();
+        Task<List<Device>> GetDevicesByTypeAsync(DeviceType deviceType);
     }
 
     public class DeviceRepository : IDeviceRepository
@@ -36,7 +39,16 @@ namespace DAL.Repositories
             await _context.Devices.AddAsync(device);
             await _context.SaveChangesAsync();
         }
-
+        public async Task<List<Device>> GetAllDevicesAsync()
+        {
+            return await _context.Devices.ToListAsync();
+        }
+        public async Task<List<Device>> GetDevicesByTypeAsync(DeviceType deviceType)
+        {
+            return await _context.Devices
+                .Where(d => d.Type == deviceType)
+                .ToListAsync();
+        }
     }
 
 }

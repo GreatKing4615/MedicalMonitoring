@@ -9,8 +9,8 @@ namespace DAL.Repositories
         Task<IEnumerable<ResearchHistory>> GetAllAsync(int pageNumber, int pageSize);
         Task<ResearchHistory> GetByIdAsync(int id);
         Task AddAsync(ResearchHistory researchHistory);
-        Task<List<PatientFlowData>> GetPatientFlowDataAsync(DeviceType deviceType);
-
+        Task DeleteDataInRangeAsync(DateTimeOffset fromDate, DateTimeOffset toDate);
+        Task<List<PatientFlowData>> GetPatientFlowDataAsync(DeviceType deviceType, DateTimeOffset? fromDate = null);
     }
 
     public class ResearchHistoryRepository : IResearchHistoryRepository
@@ -41,11 +41,18 @@ namespace DAL.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<PatientFlowData>> GetPatientFlowDataAsync(DeviceType deviceType)
+        public async Task<List<PatientFlowData>> GetPatientFlowDataAsync(DeviceType deviceType, DateTimeOffset? fromDate = null)
         {
-            return await _context.ResearchHistories
+            var query = _context.ResearchHistories
                 .Include(rh => rh.Device)
-                .Where(rh => rh.Device.Type == deviceType)
+                .Where(rh => rh.Device.Type == deviceType);
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(rh => rh.ResearchDate >= fromDate.Value);
+            }
+
+            return await query
                 .GroupBy(rh => rh.ResearchDate.Date)
                 .Select(g => new PatientFlowData
                 {
@@ -54,6 +61,16 @@ namespace DAL.Repositories
                 })
                 .OrderBy(data => data.Date)
                 .ToListAsync();
+        }
+
+        public async Task DeleteDataInRangeAsync(DateTimeOffset fromDate, DateTimeOffset toDate)
+        {
+            var dataToDelete = await _context.ResearchHistories
+                .Where(rh => rh.ResearchDate >= fromDate && rh.ResearchDate <= toDate)
+                .ToListAsync();
+
+            _context.ResearchHistories.RemoveRange(dataToDelete);
+            await _context.SaveChangesAsync();
         }
     }
 }
