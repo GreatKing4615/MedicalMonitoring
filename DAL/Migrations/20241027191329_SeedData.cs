@@ -10,63 +10,65 @@ namespace DAL.Migrations
         {
             string query = @"
     -- Добавляем устройства
-    INSERT INTO public.""Devices"" (ModelName, Type, Status, CreateTs, BeginDate, EndDate)
-    VALUES
-    ('Siemens Magnetom', 2, 0, SYSDATETIMEOFFSET(), DATEADD(DAY, -365, SYSDATETIMEOFFSET()), DATEADD(DAY, 365, SYSDATETIMEOFFSET())),
-    ('GE Discovery', 1, 0, SYSDATETIMEOFFSET(), DATEADD(DAY, -200, SYSDATETIMEOFFSET()), DATEADD(DAY, 200, SYSDATETIMEOFFSET())),
-    ('Philips Affiniti', 0, 0, SYSDATETIMEOFFSET(), DATEADD(DAY, -100, SYSDATETIMEOFFSET()), DATEADD(DAY, 300, SYSDATETIMEOFFSET())),
-    ('Toshiba Aquilion', 1, 0, SYSDATETIMEOFFSET(), DATEADD(DAY, -150, SYSDATETIMEOFFSET()), DATEADD(DAY, 150, SYSDATETIMEOFFSET())),
-    ('Olympus EVIS EXERA', 4, 0, SYSDATETIMEOFFSET(), DATEADD(DAY, -90, SYSDATETIMEOFFSET()), DATEADD(DAY, 270, SYSDATETIMEOFFSET()));
+INSERT INTO public.""Devices"" (""ModelName"", ""Type"", ""Status"", ""CreateTs"", ""BeginDate"", ""EndDate"")
+VALUES
+('Siemens Magnetom', 2, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '365 days', CURRENT_TIMESTAMP + INTERVAL '365 days'),
+('GE Discovery', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '200 days', CURRENT_TIMESTAMP + INTERVAL '200 days'),
+('Philips Affiniti', 0, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '100 days', CURRENT_TIMESTAMP + INTERVAL '300 days'),
+('Toshiba Aquilion', 1, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '150 days', CURRENT_TIMESTAMP + INTERVAL '150 days'),
+('Olympus EVIS EXERA', 4, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '90 days', CURRENT_TIMESTAMP + INTERVAL '270 days');
 
-    -- Добавляем исследования
-    INSERT INTO public.""Researches"" (Name, Duration)
-    VALUES
-    ('МРТ головного мозга', 30),
-    ('КТ легких', 20),
-    ('УЗИ брюшной полости', 15),
-    ('Рентген грудной клетки', 10),
-    ('Эндоскопия желудка', 25);
+-- Добавляем исследования
+-- Добавляем исследования
+INSERT INTO public.""Researches"" (""Name"", ""Duration"")
+VALUES
+('МРТ головного мозга', INTERVAL '30 minutes'),
+('КТ легких', INTERVAL '20 minutes'),
+('УЗИ брюшной полости', INTERVAL '15 minutes'),
+('Рентген грудной клетки', INTERVAL '10 minutes'),
+('Эндоскопия желудка', INTERVAL '25 minutes');
 
-    -- Добавляем пользователей
-    INSERT INTO public.""Users"" (Login, Role, CreateDate)
-    VALUES
-    ('admin', 0, SYSDATETIMEOFFSET()),
-    ('operator1', 1, SYSDATETIMEOFFSET()),
-    ('operator2', 1, SYSDATETIMEOFFSET()),
-    ('technician', 1, SYSDATETIMEOFFSET());
 
-    -- Генерируем данные за последние 100 дней
-    DECLARE @StartDate DATE = DATEADD(DAY, -99, CAST(GETDATE() AS DATE));
-    DECLARE @EndDate DATE = CAST(GETDATE() AS DATE);
+-- Добавляем пользователей
+INSERT INTO public.""Users"" (""Login"", ""Role"", ""CreateDate"")
+VALUES
+('admin', 0, CURRENT_TIMESTAMP),
+('operator1', 1, CURRENT_TIMESTAMP),
+('operator2', 1, CURRENT_TIMESTAMP),
+('technician', 1, CURRENT_TIMESTAMP);
 
-    WITH Dates AS (
-        SELECT @StartDate AS TheDate
-        UNION ALL
-        SELECT DATEADD(DAY, 1, TheDate)
-        FROM Dates
-        WHERE DATEADD(DAY, 1, TheDate) <= @EndDate
-    )
-    INSERT INTO public.""ResearchHistories"" (ResearchId, ResearchDate, DeviceId)
-    SELECT
-        (SELECT TOP 1 Id FROM Research ORDER BY NEWID()),
-        DATEADD(MINUTE, ABS(CHECKSUM(NEWID())) % 1440, CAST(D.TheDate AS DATETIMEOFFSET)),
-        (SELECT TOP 1 Id FROM Device ORDER BY NEWID())
-    FROM Dates D
-    CROSS APPLY (
-        SELECT TOP (ABS(CHECKSUM(NEWID())) % 11 + 5) 1 AS Dummy
-        FROM sys.columns c1, sys.columns c2
-    ) AS T
-    OPTION (MAXRECURSION 0);
+-- Генерируем данные за последние 100 дней
+DO $$
+DECLARE
+    StartDate DATE := CURRENT_DATE - INTERVAL '99 days';
+    EndDate DATE := CURRENT_DATE;
+    Day RECORD;
+BEGIN
+    FOR Day IN 
+        SELECT generate_series(StartDate, EndDate, INTERVAL '1 day') AS ""TheDate""
+    LOOP
+        -- Генерируем от 5 до 15 записей на каждый день
+        PERFORM * FROM generate_series(1, FLOOR(random() * 11 + 5)::int);
+        
+        INSERT INTO public.""ResearchHistories"" (""ResearchId"", ""ResearchDate"", ""DeviceId"")
+        SELECT
+            (SELECT ""Id"" FROM public.""Researches"" ORDER BY random() LIMIT 1), -- Случайное исследование
+            Day.""TheDate"" + (random() * INTERVAL '1 day'), -- Дата исследования с случайным временем
+            (SELECT ""Id"" FROM public.""Devices"" ORDER BY random() LIMIT 1) -- Случайное устройство
+        FROM generate_series(1, FLOOR(random() * 11 + 5)::int);
+    END LOOP;
+END $$;
 
-    -- Генерируем данные обслуживания для устройств
-    INSERT INTO public.""ServiceHistories"" (DeviceId, ServiceDate, WorkType, UserId)
-    SELECT
-        D.Id,
-        DATEADD(DAY, -ABS(CHECKSUM(NEWID())) % 90, SYSDATETIMEOFFSET()),
-        ABS(CHECKSUM(NEWID())) % 2,
-        (SELECT TOP 1 Id FROM [User] WHERE Role = 1 ORDER BY NEWID())
-    FROM Device D
-    WHERE D.Status = 0;
+
+-- Генерируем данные обслуживания для устройств
+INSERT INTO public.""ServiceHistories"" (""DeviceId"", ""ServiceDate"", ""WorkType"", ""ResponsibleId"")
+SELECT
+    D.""Id"",
+    CURRENT_TIMESTAMP - (random() * INTERVAL '90 days'),
+    FLOOR(random() * 2), -- 0 или 1
+    (SELECT ""Id"" FROM public.""Users"" WHERE ""Role"" = 1 ORDER BY random() LIMIT 1)
+FROM public.""Devices"" D
+WHERE D.""Status"" = 0;
 ";
 
 
