@@ -20,7 +20,8 @@ services:
       context: .  # Контекстом сборки становится корневая директория
       dockerfile: MedicalMonitoring/Dockerfile  # Путь к Dockerfile внутри папки MedicalMonitoring
     ports:
-      - "5000:80"
+      - "5001:80"
+      - "5002:443"
     depends_on:
       - postgres
     environment:
@@ -32,7 +33,7 @@ services:
   ml_service:
     build:
       context: ./patient_flow_prediction_service
-      dockerfile: patient_flow_prediction_service/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
 

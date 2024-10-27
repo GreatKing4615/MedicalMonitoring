@@ -48,7 +48,7 @@ public class PythonPredictionService: IPythonPredictionService
 
         var content = new StringContent(JsonSerializer.Serialize(requestData), Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync("http://localhost:5000/predict", content); // http://ml_service:5000/predict
+        var response = await _httpClient.PostAsync("http://ml_service:5000/predict", content); // http://ml_service:5000/predict
 
         response.EnsureSuccessStatusCode();
 
