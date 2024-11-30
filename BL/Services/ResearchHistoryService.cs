@@ -47,34 +47,38 @@ namespace BL.Services
 
         public async Task<ResearchHistoryDto> CreateResearchHistoryAsync(ResearchHistoryDto researchHistoryDto)
         {
-            // Business logic: Validate input
+            // Проверка входных данных
             if (researchHistoryDto.ResearchId == 0)
                 throw new ValidationException("ResearchId is required.");
-
             if (researchHistoryDto.DeviceId == 0)
                 throw new ValidationException("DeviceId is required.");
 
-            // Check if Research exists
+            // Получаем связанные сущности
             var research = await _researchRepository.GetByIdAsync(researchHistoryDto.ResearchId);
             if (research == null)
                 throw new ValidationException("Research not found.");
 
-            // Check if Device exists
             var device = await _deviceRepository.GetDeviceByIdAsync(researchHistoryDto.DeviceId);
             if (device == null)
                 throw new ValidationException("Device not found.");
 
-            // Map DTO to entity
-            var researchHistory = _mapper.Map<ResearchHistory>(researchHistoryDto);
-            researchHistory.Research = research;
-            researchHistory.Device = device;
+            // Создаем новую запись истории исследования
+            var researchHistory = new ResearchHistory
+            {
+                Research = research,
+                Device = device,
+                ResearchDate = researchHistoryDto.ResearchDate,
+                StartTime = researchHistoryDto.StartTime,
+                EndTime = researchHistoryDto.EndTime
+            };
 
-            // Save to repository
+            // Сохраняем в репозиторий
             await _researchHistoryRepository.AddAsync(researchHistory);
 
-            // Map back to DTO
+            // Возвращаем результат
             return _mapper.Map<ResearchHistoryDto>(researchHistory);
         }
+
 
     }
 }

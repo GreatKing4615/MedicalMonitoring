@@ -17,7 +17,7 @@ services:
   api:
     image: ${DOCKER_REGISTRY-}aspnetcore-api
     build:
-      context: .  # Контекстом сборки становится корневая директория
+      context: .  # Контекст сборки — корневая директория
       dockerfile: MedicalMonitoring/Dockerfile  # Путь к Dockerfile внутри папки MedicalMonitoring
     ports:
       - "5001:80"
@@ -36,6 +36,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
+    networks:
+      - monitoring-network
 
   prometheus:
     image: prom/prometheus
@@ -45,9 +47,26 @@ services:
       - ./prometheus:/etc/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - monitoring-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    networks:
+      - monitoring-network
 
 volumes:
   postgres-data:
+  grafana-storage:
 
 networks:
   monitoring-network:

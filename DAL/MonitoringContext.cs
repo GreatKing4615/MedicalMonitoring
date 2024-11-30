@@ -57,6 +57,13 @@ public class MonitoringContext: DbContext
             .HasOne(x => x.Device)
             .WithMany(x => x.ResearchHistory);
 
+        modelBuilder.Entity<ResearchHistory>()
+            .Property(x => x.StartTime)
+            .IsRequired();
+
+        modelBuilder.Entity<ResearchHistory>()
+            .Property(x => x.EndTime)
+            .IsRequired();
         #endregion
 
         #region ServiceHistory
@@ -70,6 +77,14 @@ public class MonitoringContext: DbContext
         modelBuilder.Entity<ServiceHistory>()
             .HasOne(x => x.Device)
             .WithMany(x=>x.ServiceHistory);
+
+        modelBuilder.Entity<ServiceHistory>()
+            .Property(x => x.StartTime)
+            .IsRequired();
+
+        modelBuilder.Entity<ServiceHistory>()
+            .Property(x => x.EndTime)
+            .IsRequired();
         #endregion
     }
 }

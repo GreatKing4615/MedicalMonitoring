@@ -31,6 +31,8 @@ namespace BL.Dtos
         public int ResearchId { get; set; }
         public DateTimeOffset ResearchDate { get; set; }
         public int DeviceId { get; set; }
+        public DateTimeOffset StartTime { get; set; }
+        public DateTimeOffset EndTime { get; set; }
     }
 
     public class ServiceHistoryDto
@@ -41,6 +43,8 @@ namespace BL.Dtos
         public WorkType WorkType { get; set; }
         public int ResponsibleUserId { get; set; }
         public int UserId { get; set; }
+        public DateTimeOffset StartTime { get; set; }
+        public DateTimeOffset EndTime { get; set; }
     }
 }
 
