@@ -87,7 +87,7 @@ namespace BL.Services
                 }
             }
 
-            // Рассчитываем процент загрузки и сохраняем результаты
+            // Рассчитываем процент загрузки и рекомендации
             var simulationResults = new List<SimulationResult>();
 
             foreach (var device in devices)
@@ -95,8 +95,8 @@ namespace BL.Services
                 var totalLoadMinutes = deviceLoadDict[device.Id];
 
                 var loadPercentage = (totalLoadMinutes / totalSimulationMinutes) * 100;
-                var isOverloaded = false; // Индивидуальные устройства не считаются перегруженными
-                var recommendedAdditionalUnits = 0; // Рекомендации по закупке будут рассчитываться по типам
+                var isOverloaded = loadPercentage > 80; // Считаем перегруженным, если загрузка > 80%
+                var recommendedAdditionalUnits = isOverloaded ? 1 : 0;
 
                 var simulationResult = new SimulationResult
                 {
@@ -125,8 +125,5 @@ namespace BL.Services
 
             return simulationResultDtos;
         }
-
     }
-
-
 }
