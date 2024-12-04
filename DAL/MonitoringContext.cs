@@ -10,6 +10,7 @@ public class MonitoringContext: DbContext
     public DbSet<Device> Devices { get; set; }
     public DbSet<ServiceHistory> ServiceHistories { get; set; }
     public DbSet<ResearchHistory> ResearchHistories { get; set; }
+    public DbSet<SimulationResult> SimulationResults { get; set; }
 
 
     public MonitoringContext(DbContextOptions<MonitoringContext> options)
@@ -43,6 +44,10 @@ public class MonitoringContext: DbContext
         #region Research
         modelBuilder.Entity<Research>()
             .HasKey(x => x.Id);
+        modelBuilder.Entity<Research>()
+            .Property(r => r.DeviceTypes)
+            .HasColumnType("integer[]");
+
         #endregion
 
         #region ResearchHistory
@@ -85,6 +90,16 @@ public class MonitoringContext: DbContext
         modelBuilder.Entity<ServiceHistory>()
             .Property(x => x.EndTime)
             .IsRequired();
+        #endregion
+
+        #region SimulationResult
+        modelBuilder.Entity<SimulationResult>()
+            .HasKey(e => e.Id);
+
+        modelBuilder.Entity<SimulationResult>()
+            .HasOne(sr => sr.Device)
+            .WithMany()
+            .HasForeignKey(sr => sr.DeviceId);
         #endregion
     }
 }

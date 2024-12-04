@@ -17,6 +17,9 @@ namespace MedicalMonitoring.MappingProfile
             CreateMap<ResearchHistory, PatientFlowData>()
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.ResearchDate.Date))
                 .ForMember(dest => dest.PatientCount, opt => opt.MapFrom(src => 1));
+
+            CreateMap<SimulationResult, SimulationResultDto>()
+            .ForMember(dest => dest.DeviceModelName, opt => opt.MapFrom(src => src.Device.ModelName));
         }
     }
 

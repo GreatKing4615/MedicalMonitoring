@@ -26,6 +26,7 @@ builder.Services.AddScoped<IResearchHistoryRepository, ResearchHistoryRepository
 builder.Services.AddScoped<IServiceHistoryRepository, ServiceHistoryRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+builder.Services.AddScoped<ISimulationResultRepository, SimulationResultRepository>();
 
 // Register services
 builder.Services.AddScoped<IResearchService, ResearchService>();
@@ -36,6 +37,7 @@ builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<IPythonPredictionService, PythonPredictionService>();
 builder.Services.AddScoped<IPredictionService, PredictionService>();
 builder.Services.AddScoped<IDataGenerationService, DataGenerationService>();
+builder.Services.AddScoped<ISimulationService, SimulationService>();
 builder.Services.AddHttpClient<PythonPredictionService>();
 
 

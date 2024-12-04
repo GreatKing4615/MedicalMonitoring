@@ -26,13 +26,13 @@ VALUES
 ('Olympus EVIS EXERA', 4, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP - INTERVAL '90 days', CURRENT_TIMESTAMP + INTERVAL '270 days');
 
 -- Добавляем исследования
-INSERT INTO public.""Researches"" (""Name"", ""Duration"")
+INSERT INTO public.""Researches"" (""Name"", ""Duration"", ""DeviceTypes"")
 VALUES
-('МРТ головного мозга', INTERVAL '30 minutes'),
-('КТ легких', INTERVAL '20 minutes'),
-('УЗИ брюшной полости', INTERVAL '15 minutes'),
-('Рентген грудной клетки', INTERVAL '10 minutes'),
-('Эндоскопия желудка', INTERVAL '25 minutes');
+('МРТ головного мозга', INTERVAL '30 minutes', ARRAY[2]),
+('КТ легких', INTERVAL '20 minutes', ARRAY[1]),
+('УЗИ брюшной полости', INTERVAL '15 minutes', ARRAY[0]),
+('Рентген грудной клетки', INTERVAL '10 minutes', ARRAY[3]),
+('Эндоскопия желудка', INTERVAL '25 minutes', ARRAY[4]);
 
 -- Добавляем пользователей
 INSERT INTO public.""Users"" (""Login"", ""Role"", ""CreateDate"")

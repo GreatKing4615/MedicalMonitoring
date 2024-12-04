@@ -3,6 +3,7 @@ using System;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DAL.Migrations
 {
     [DbContext(typeof(MonitoringContext))]
-    partial class MonitoringContextModelSnapshot : ModelSnapshot
+    [Migration("20241204025832_AddSimulationResult")]
+    partial class AddSimulationResult
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,7 +60,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Devices", (string)null);
+                    b.ToTable("Devices");
                 });
 
             modelBuilder.Entity("DAL.Entities.Research", b =>
@@ -82,7 +84,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Researches", (string)null);
+                    b.ToTable("Researches");
                 });
 
             modelBuilder.Entity("DAL.Entities.ResearchHistory", b =>
@@ -114,7 +116,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("ResearchId");
 
-                    b.ToTable("ResearchHistories", (string)null);
+                    b.ToTable("ResearchHistories");
                 });
 
             modelBuilder.Entity("DAL.Entities.ServiceHistory", b =>
@@ -149,7 +151,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("ResponsibleId");
 
-                    b.ToTable("ServiceHistories", (string)null);
+                    b.ToTable("ServiceHistories");
                 });
 
             modelBuilder.Entity("DAL.Entities.SimulationResult", b =>
@@ -179,7 +181,7 @@ namespace DAL.Migrations
 
                     b.HasIndex("DeviceId");
 
-                    b.ToTable("SimulationResults", (string)null);
+                    b.ToTable("SimulationResults");
                 });
 
             modelBuilder.Entity("DAL.Entities.User", b =>
@@ -205,7 +207,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("DAL.Entities.ResearchHistory", b =>

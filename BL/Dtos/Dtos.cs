@@ -46,5 +46,24 @@ namespace BL.Dtos
         public DateTimeOffset StartTime { get; set; }
         public DateTimeOffset EndTime { get; set; }
     }
+    public class SimulationResultDto
+    {
+        public int DeviceId { get; set; }
+        public string DeviceModelName { get; set; }
+        public double LoadPercentage { get; set; }
+        public bool IsOverloaded { get; set; }
+        public int RecommendedAdditionalUnits { get; set; }
+    }
+    public class PurchaseRecommendationDto
+    {
+        public DeviceType DeviceType { get; set; }
+        public string DeviceTypeName { get; set; }
+        public int ExistingUnits { get; set; }
+        public double TotalLoadPercentage { get; set; }
+        public double AverageLoadPercentage { get; set; }
+        public int RecommendedAdditionalUnits { get; set; }
+    }
+ 
+
 }
 
