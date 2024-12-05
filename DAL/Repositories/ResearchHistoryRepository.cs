@@ -9,6 +9,7 @@ namespace DAL.Repositories
         Task<IEnumerable<ResearchHistory>> GetAllAsync(int pageNumber, int pageSize);
         Task<ResearchHistory> GetByIdAsync(int id);
         Task AddAsync(ResearchHistory researchHistory);
+        Task AddRangeAsync(IEnumerable<ResearchHistory> researchHistories);
         Task DeleteDataInRangeAsync(DateTimeOffset fromDate, DateTimeOffset toDate);
         Task<List<PatientFlowData>> GetPatientFlowDataAsync(DeviceType deviceType, DateTimeOffset? fromDate = null);
     }
@@ -20,6 +21,12 @@ namespace DAL.Repositories
         public ResearchHistoryRepository(MonitoringContext context)
         {
             _context = context;
+        }
+
+        public async Task AddRangeAsync(IEnumerable<ResearchHistory> researchHistories)
+        {
+            await _context.ResearchHistories.AddRangeAsync(researchHistories);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<ResearchHistory>> GetAllAsync(int pageNumber, int pageSize)

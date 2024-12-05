@@ -16,13 +16,14 @@ namespace MedicalMonitoring.Controllers
 
         [HttpPost]
         public async Task<IActionResult> RunSimulation(
-            [FromQuery] int simulationDays = 30,
+            [FromQuery] DateTimeOffset fromDate,
+            [FromQuery] DateTimeOffset toDate,
             [FromQuery] int minPatientsPerDay = 50,
             [FromQuery] int maxPatientsPerDay = 100)
         {
             try
             {
-                var results = await _simulationService.RunSimulationAsync(simulationDays, minPatientsPerDay, maxPatientsPerDay);
+                var results = await _simulationService.RunSimulationAsync(fromDate, toDate, minPatientsPerDay, maxPatientsPerDay);
                 return Ok(results);
             }
             catch (Exception ex)
