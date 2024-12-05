@@ -11,6 +11,8 @@ public class MonitoringContext: DbContext
     public DbSet<ServiceHistory> ServiceHistories { get; set; }
     public DbSet<ResearchHistory> ResearchHistories { get; set; }
     public DbSet<SimulationResult> SimulationResults { get; set; }
+    public DbSet<EquipmentLoadForecast> EquipmentLoadForecasts { get; set; }
+
 
 
     public MonitoringContext(DbContextOptions<MonitoringContext> options)
@@ -101,5 +103,9 @@ public class MonitoringContext: DbContext
             .WithMany()
             .HasForeignKey(sr => sr.DeviceId);
         #endregion
+
+
+        modelBuilder.Entity<EquipmentLoadForecast>()
+            .HasKey(e => e.Id);
     }
 }

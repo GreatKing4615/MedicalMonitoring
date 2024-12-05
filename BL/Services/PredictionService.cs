@@ -3,26 +3,29 @@ using DAL.Repositories;
 using Microsoft.ML;
 using Microsoft.ML.Transforms.TimeSeries;
 using Accord.Math;
-
+using DAL.Entities;
 
 namespace BL.Services
 {
     public interface IPredictionService
     {
-        Task<PatientFlowPrediction> PredictPatientFlowAsync(DeviceType deviceType, int horizon, DateTimeOffset? fromDate = null);
-        Task<List<EquipmentLoadForecast>> PredictEquipmentLoadWithArimaAsync(DeviceType deviceType, int horizon, DateTimeOffset? fromDate = null);
+        Task<List<EquipmentLoadForecast>> PredictEquipmentLoadForAllDeviceTypesAsync(int horizon, DateTimeOffset? fromDate = null);
+        Task<List<PythonEquipmentLoadForecast>> PredictEquipmentLoadWithArimaAsync(DeviceType deviceType, int horizon, DateTimeOffset? fromDate = null);
     }
 
     public class PredictionService : IPredictionService
     {
         private readonly IResearchHistoryRepository _researchHistoryRepository;
         private readonly IPythonPredictionService _pythonPredictionService;
+        private readonly IEquipmentLoadForecastRepository _equipmentLoadForecastRepository;
 
 
-        public PredictionService(IResearchHistoryRepository researchHistoryRepository, IPythonPredictionService pythonPredictionService)
+
+        public PredictionService(IResearchHistoryRepository researchHistoryRepository, IPythonPredictionService pythonPredictionService, IEquipmentLoadForecastRepository equipmentLoadForecastRepository)
         {
             _researchHistoryRepository = researchHistoryRepository;
             _pythonPredictionService = pythonPredictionService;
+            _equipmentLoadForecastRepository = equipmentLoadForecastRepository;
         }
 
         public async Task<PatientFlowPrediction> PredictPatientFlowAsync(DeviceType deviceType, int horizon, DateTimeOffset? fromDate = null)
@@ -73,11 +76,87 @@ namespace BL.Services
             return new PatientFlowPrediction { Forecasts = forecasts };
         }
 
+        public async Task<List<EquipmentLoadForecast>> PredictEquipmentLoadForAllDeviceTypesAsync(int horizon, DateTimeOffset? fromDate = null)
+        {
+            var allPredictions = new List<EquipmentLoadForecast>();
+            var generatedDate = DateTimeOffset.UtcNow;
 
-        public async Task<List<EquipmentLoadForecast>> PredictEquipmentLoadWithArimaAsync(
-            DeviceType deviceType,
-            int horizon,
-            DateTimeOffset? fromDate = null)
+            // Получаем все типы оборудования
+            var deviceTypes = Enum.GetValues(typeof(DeviceType)).Cast<DeviceType>();
+
+            foreach (var deviceType in deviceTypes)
+            {
+                try
+                {
+                    // Проверяем, есть ли уже прогнозы для этого типа оборудования
+                    var existingForecasts = await _equipmentLoadForecastRepository.GetForecastsAsync(deviceType, generatedDate);
+
+                    if (existingForecasts.Any())
+                    {
+                        // Добавляем существующие прогнозы в общий список
+                        allPredictions.AddRange(existingForecasts);
+                        continue;
+                    }
+
+                    // Получаем исторические данные о потоке пациентов
+                    var historyData = await _researchHistoryRepository.GetPatientFlowDataAsync(deviceType, fromDate);
+
+                    if (historyData.Count < 10)
+                    {
+                        // Пропускаем тип оборудования, если недостаточно данных
+                        continue;
+                    }
+
+                    // Преобразуем данные для Python-сервиса
+                    var patientFlowData = historyData
+                        .Select(d => new PatientFlowData
+                        {
+                            Date = d.Date,
+                            PatientCount = (int)d.PatientCount
+                        })
+                        .ToList();
+
+                    // Рассчитываем MaxDailyCapacity
+                    int maxCapacity = await CalculateMaxDailyCapacityAsync(deviceType, fromDate);
+
+                    // Получаем прогнозы от Python-сервиса
+                    var predictions = await _pythonPredictionService.GetEquipmentLoadPredictionAsync(
+                        patientFlowData,
+                        horizon,
+                        maxCapacity);
+
+                    // Преобразуем прогнозы для сохранения в базе данных
+                    var forecastEntities = predictions.Select(p => new EquipmentLoadForecast
+                    {
+                        DeviceType = deviceType,
+                        Date = p.Date,
+                        PredictedPatientCount = p.PredictedPatientCount,
+                        LoadPercentage = p.LoadPercentage,
+                        IsOverloaded = p.IsOverloaded,
+                        GeneratedDate = generatedDate
+                    }).ToList();
+
+                    // Сохраняем прогнозы в базе данных
+                    await _equipmentLoadForecastRepository.AddRangeAsync(forecastEntities);
+
+                    // Добавляем прогнозы в общий список
+                    allPredictions.AddRange(forecastEntities);
+                }
+                catch (Exception ex)
+                {
+                    // Логируем ошибку и продолжаем с другим типом оборудования
+                    // Можно использовать логгер или просто пропустить
+                    continue;
+                }
+            }
+
+            return allPredictions;
+        }
+
+        public async Task<List<PythonEquipmentLoadForecast>> PredictEquipmentLoadWithArimaAsync(
+    DeviceType deviceType,
+    int horizon,
+    DateTimeOffset? fromDate = null)
         {
             // Получаем исторические данные о потоке пациентов
             var historyData = await _researchHistoryRepository.GetPatientFlowDataAsync(deviceType, fromDate);
@@ -104,6 +183,26 @@ namespace BL.Services
                 patientFlowData,
                 horizon,
                 maxCapacity);
+
+            // Получаем текущую дату и время генерации прогноза
+            var generatedDate = DateTimeOffset.UtcNow;
+
+            // Удаляем старые прогнозы для этого типа оборудования
+            await _equipmentLoadForecastRepository.ClearOldForecastsAsync(deviceType, generatedDate);
+
+            // Преобразуем прогнозы для сохранения в базе данных
+            var forecastEntities = predictions.Select(p => new EquipmentLoadForecast
+            {
+                DeviceType = deviceType,
+                Date = p.Date,
+                PredictedPatientCount = p.PredictedPatientCount,
+                LoadPercentage = p.LoadPercentage,
+                IsOverloaded = p.IsOverloaded,
+                GeneratedDate = generatedDate
+            }).ToList();
+
+            // Сохраняем прогнозы в базе данных
+            await _equipmentLoadForecastRepository.AddRangeAsync(forecastEntities);
 
             return predictions;
         }

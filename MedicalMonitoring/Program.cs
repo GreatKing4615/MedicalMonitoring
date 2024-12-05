@@ -27,6 +27,8 @@ builder.Services.AddScoped<IServiceHistoryRepository, ServiceHistoryRepository>(
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<ISimulationResultRepository, SimulationResultRepository>();
+builder.Services.AddScoped<IEquipmentLoadForecastRepository, EquipmentLoadForecastRepository>();
+
 
 // Register services
 builder.Services.AddScoped<IResearchService, ResearchService>();

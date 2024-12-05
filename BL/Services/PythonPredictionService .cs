@@ -7,7 +7,7 @@ public class PatientFlowData
     public int PatientCount { get; set; }
 }
 
-public class EquipmentLoadForecast
+public class PythonEquipmentLoadForecast
 {
     public DateTime Date { get; set; }
     public int PredictedPatientCount { get; set; }
@@ -18,7 +18,7 @@ public class EquipmentLoadForecast
 
 public interface IPythonPredictionService
 {
-    Task<List<EquipmentLoadForecast>> GetEquipmentLoadPredictionAsync(List<PatientFlowData> historicalData, int horizon, int maxCapacity);
+    Task<List<PythonEquipmentLoadForecast>> GetEquipmentLoadPredictionAsync(List<PatientFlowData> historicalData, int horizon, int maxCapacity);
 }
 
 public class PythonPredictionService: IPythonPredictionService
@@ -30,7 +30,7 @@ public class PythonPredictionService: IPythonPredictionService
         _httpClient = httpClient;
     }
 
-    public async Task<List<EquipmentLoadForecast>> GetEquipmentLoadPredictionAsync(
+    public async Task<List<PythonEquipmentLoadForecast>> GetEquipmentLoadPredictionAsync(
         List<PatientFlowData> historicalData,
         int horizon,
         int maxCapacity)
@@ -59,7 +59,7 @@ public class PythonPredictionService: IPythonPredictionService
             PropertyNameCaseInsensitive = true
         };
 
-        var predictions = JsonSerializer.Deserialize<List<EquipmentLoadForecast>>(responseContent, options);
+        var predictions = JsonSerializer.Deserialize<List<PythonEquipmentLoadForecast>>(responseContent, options);
 
         return predictions;
     }
