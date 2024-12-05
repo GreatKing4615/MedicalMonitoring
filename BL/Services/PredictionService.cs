@@ -88,15 +88,6 @@ namespace BL.Services
             {
                 try
                 {
-                    // Проверяем, есть ли уже прогнозы для этого типа оборудования
-                    var existingForecasts = await _equipmentLoadForecastRepository.GetForecastsAsync(deviceType, generatedDate);
-
-                    if (existingForecasts.Any())
-                    {
-                        // Добавляем существующие прогнозы в общий список
-                        allPredictions.AddRange(existingForecasts);
-                        continue;
-                    }
 
                     // Получаем исторические данные о потоке пациентов
                     var historyData = await _researchHistoryRepository.GetPatientFlowDataAsync(deviceType, fromDate);

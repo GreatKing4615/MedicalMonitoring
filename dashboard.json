@@ -50,8 +50,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "#EAB839",
@@ -68,7 +67,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 9,
+        "h": 11,
         "w": 24,
         "x": 0,
         "y": 1
@@ -127,16 +126,14 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-GrYlRd"
+            "mode": "thresholds"
           },
           "mappings": [],
-          "noValue": "нет рекомендаций",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -148,28 +145,35 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 12,
-        "w": 11,
+        "h": 10,
+        "w": 13,
         "x": 0,
-        "y": 10
+        "y": 12
       },
-      "id": 11,
+      "id": 12,
       "options": {
-        "colorMode": "background",
-        "graphMode": "area",
-        "justifyMode": "center",
+        "displayMode": "gradient",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "maxVizHeight": 300,
+        "minVizHeight": 16,
+        "minVizWidth": 8,
+        "namePlacement": "auto",
         "orientation": "auto",
-        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
-            "allValues"
+            "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "",
           "values": true
         },
-        "showPercentChange": false,
-        "textMode": "auto",
-        "wideLayout": true
+        "showUnfilled": true,
+        "sizing": "auto",
+        "valueMode": "color"
       },
       "pluginVersion": "11.3.1",
       "targets": [
@@ -177,7 +181,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "WITH DeviceTypes AS (\r\n  SELECT 0 AS \"TypeId\", 'УЗИ' AS \"EquipmentType\"\r\n  UNION ALL\r\n  SELECT 1, 'КТ'\r\n  UNION ALL\r\n  SELECT 2, 'МРТ'\r\n  UNION ALL\r\n  SELECT 3, 'Рентген'\r\n  UNION ALL\r\n  SELECT 4, 'Эндоскоп'\r\n)\r\n\r\nSELECT\r\n  DT.\"EquipmentType\" AS \"Тип оборудования\",\r\n  SR.\"ExistingUnits\" AS \"Количество устройств\",\r\n  ROUND(SR.\"TotalLoadPercentage\", 2) AS \"Суммарная нагрузка (%)\",\r\n  SR.\"RecommendedAdditionalUnits\" AS \"Рекомендуемое количество\"\r\nFROM\r\n  public.\"SimulationResultsByType\" SR\r\n  JOIN DeviceTypes DT ON SR.\"DeviceType\" = DT.\"TypeId\"\r\nWHERE\r\n  SR.\"SimulationDate\" = (SELECT MAX(\"SimulationDate\") FROM public.\"SimulationResultsByType\")\r\n  AND SR.\"RecommendedAdditionalUnits\" > 0\r\nORDER BY\r\n  \"Рекомендуемое количество\" DESC\r\n",
+          "rawSql": "WITH DeviceTypes AS (\r\n  SELECT 0 AS \"TypeId\", 'УЗИ' AS \"Тип оборудования\"\r\n  UNION ALL\r\n  SELECT 1, 'КТ' AS \"Тип оборудования\"\r\n  UNION ALL\r\n  SELECT 2, 'МРТ' AS \"Тип оборудования\"\r\n  UNION ALL\r\n  SELECT 3, 'Рентген' AS \"Тип оборудования\"\r\n  UNION ALL\r\n  SELECT 4, 'Эндоскоп' AS \"Тип оборудования\"\r\n),\r\nEquipmentNeeds AS (\r\n  SELECT\r\n    DT.\"Тип оборудования\",\r\n    CEIL(SUM(SR.\"LoadPercentage\") / 80.0) - COUNT(DISTINCT D.\"Id\") AS \"Необходимо докупить\"\r\n  FROM\r\n    public.\"SimulationResults\" SR\r\n    JOIN public.\"Devices\" D ON SR.\"DeviceId\" = D.\"Id\"\r\n    JOIN DeviceTypes DT ON D.\"Type\" = DT.\"TypeId\"\r\n  WHERE\r\n    SR.\"SimulationDate\" = (\r\n      SELECT MAX(\"SimulationDate\") FROM public.\"SimulationResults\"\r\n    )\r\n  GROUP BY\r\n    DT.\"Тип оборудования\"\r\n)\r\nSELECT\r\n  \"Тип оборудования\",\r\n  \"Необходимо докупить\"\r\nFROM\r\n  EquipmentNeeds\r\nWHERE\r\n  \"Необходимо докупить\" > 0\r\nORDER BY\r\n  \"Необходимо докупить\" DESC;\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -198,9 +202,209 @@
           }
         }
       ],
-      "title": "Рекомендации по закупке",
+      "title": "Рекомендации по закупке оборудования",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee518vfnb4sg0c"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 11,
+        "x": 13,
+        "y": 12
+      },
+      "id": 13,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "11.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  EL.\"Date\" AS \"Дата\",\r\n    CASE\r\n    WHEN \"DeviceType\" = 0 THEN 'УЗИ'\r\n    WHEN \"DeviceType\" = 1 THEN 'КТ'\r\n    WHEN \"DeviceType\" = 2 THEN 'МРТ'\r\n    WHEN \"DeviceType\" = 3 THEN 'Рентген'\r\n    WHEN \"DeviceType\" = 4 THEN 'Эндоскоп'\r\n  END AS \"Тип оборудования\",\r\n  EL.\"LoadPercentage\" AS \"Прогнозируемая нагрузка (%)\",\r\n  EL.\"IsOverloaded\" AS \"Перегружено\"\r\nFROM\r\n  public.\"EquipmentLoadForecasts\" EL\r\nWHERE\r\n  EL.\"GeneratedDate\" = (\r\n    SELECT MAX(\"GeneratedDate\") FROM public.\"EquipmentLoadForecasts\"\r\n  )\r\nORDER BY\r\n  EL.\"DeviceType\",\r\n  EL.\"Date\" ASC;\r\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Прогнозируемая нагрузка на оборудование по дням",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee518vfnb4sg0c"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 30,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 2,
+            "pointSize": 10,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 15
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 22
+      },
+      "id": 1,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "right",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "11.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "ee518vfnb4sg0c"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "hide": false,
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  DATE_TRUNC('day', \"ResearchDate\") AS \"time\",\r\n  COUNT(*) AS \"StudiesPerDay\"\r\nFROM\r\n  public.\"ResearchHistories\"\r\nGROUP BY\r\n  \"time\"\r\nORDER BY\r\n  \"time\" ASC\r\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Общее количество пациентов",
       "transparent": true,
-      "type": "stat"
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -240,8 +444,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "dark-red",
-                "value": null
+                "color": "dark-red"
               },
               {
                 "color": "#EAB839",
@@ -257,10 +460,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 12,
-        "w": 13,
-        "x": 11,
-        "y": 10
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 31
       },
       "id": 8,
       "options": {
@@ -337,247 +540,6 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 30,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineStyle": {
-              "fill": "solid"
-            },
-            "lineWidth": 2,
-            "pointSize": 10,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "fieldMinMax": false,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 15
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 9,
-        "w": 24,
-        "x": 0,
-        "y": 22
-      },
-      "id": 1,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "right",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "pluginVersion": "11.3.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "grafana-postgresql-datasource",
-            "uid": "ee518vfnb4sg0c"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "hide": false,
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  DATE_TRUNC('day', \"ResearchDate\") AS \"time\",\r\n  COUNT(*) AS \"StudiesPerDay\"\r\nFROM\r\n  public.\"ResearchHistories\"\r\nGROUP BY\r\n  \"time\"\r\nORDER BY\r\n  \"time\" ASC\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Общее количество пациентов",
-      "transparent": true,
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "ee518vfnb4sg0c"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "dashed+area"
-            }
-          },
-          "fieldMinMax": false,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 30
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 11,
-        "w": 11,
-        "x": 0,
-        "y": 31
-      },
-      "id": 6,
-      "options": {
-        "barRadius": 0.25,
-        "barWidth": 0.97,
-        "fullHighlight": false,
-        "groupWidth": 0.7,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        },
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0
-      },
-      "pluginVersion": "11.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  R.\"Name\" AS \"Research\",\r\n  AVG(EXTRACT(EPOCH FROM (RH.\"EndTime\" - RH.\"StartTime\"))/60) AS \"AverageResearchDurationMinutes\"\r\nFROM\r\n  public.\"ResearchHistories\" RH\r\n  JOIN public.\"Researches\" R ON RH.\"ResearchId\" = R.\"Id\"\r\nWHERE\r\n  RH.\"StartTime\" IS NOT NULL\r\n  AND RH.\"EndTime\" IS NOT NULL\r\n  AND $__timeFilter(RH.\"ResearchDate\")\r\nGROUP BY\r\n  R.\"Name\"\r\nORDER BY\r\n  \"AverageResearchDurationMinutes\" DESC\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Среднее время проведения исследования",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "AverageResearchDurationMinutes": "Среднее время (минуты)",
-              "Research": "Исследование"
-            }
-          }
-        }
-      ],
-      "transparent": true,
-      "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "ee518vfnb4sg0c"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
             "mode": "thresholds"
           },
           "custom": {
@@ -606,8 +568,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -621,8 +582,8 @@
       },
       "gridPos": {
         "h": 11,
-        "w": 13,
-        "x": 11,
+        "w": 12,
+        "x": 12,
         "y": 31
       },
       "id": 7,
@@ -694,14 +655,14 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
-            "fillOpacity": 90,
-            "gradientMode": "opacity",
+            "fillOpacity": 80,
+            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "lineWidth": 0,
+            "lineWidth": 1,
             "scaleDistribution": {
               "type": "linear"
             },
@@ -709,14 +670,12 @@
               "mode": "off"
             }
           },
-          "fieldMinMax": false,
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -733,11 +692,10 @@
         "x": 0,
         "y": 42
       },
-      "id": 2,
+      "id": 5,
       "options": {
         "barRadius": 0.25,
-        "barWidth": 0.8,
-        "colorByField": "Device",
+        "barWidth": 0.97,
         "fullHighlight": false,
         "groupWidth": 0.7,
         "legend": {
@@ -762,7 +720,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\r\n  D.\"ModelName\" AS \"Device\",\r\n  COUNT(RH.\"Id\") AS \"ResearchCount\"\r\nFROM\r\n  public.\"ResearchHistories\" RH\r\n  JOIN public.\"Devices\" D ON RH.\"DeviceId\" = D.\"Id\"\r\nWHERE\r\n  $__timeFilter(RH.\"ResearchDate\")\r\nGROUP BY\r\n  D.\"ModelName\"\r\nORDER BY\r\n  \"ResearchCount\" DESC\r\n",
+          "rawSql": "SELECT\r\n  R.\"Name\" AS \"Research\",\r\n  COUNT(RH.\"Id\") AS \"ResearchCount\"\r\nFROM\r\n  public.\"ResearchHistories\" RH\r\n  JOIN public.\"Researches\" R ON RH.\"ResearchId\" = R.\"Id\"\r\nWHERE\r\n  $__timeFilter(RH.\"ResearchDate\")\r\nGROUP BY\r\n  R.\"Name\"\r\nORDER BY\r\n  \"ResearchCount\" DESC\r\n",
           "refId": "A",
           "sql": {
             "columns": [
@@ -783,7 +741,7 @@
           }
         }
       ],
-      "title": "Количество использований",
+      "title": "Наиболее популярное исследование",
       "transformations": [
         {
           "id": "organize",
@@ -792,8 +750,8 @@
             "includeByName": {},
             "indexByName": {},
             "renameByName": {
-              "Device": "Модель оборудования",
-              "ResearchCount": "Использовано в исследованиях"
+              "Research": "Вид исследования",
+              "ResearchCount": "Количество исследований"
             }
           }
         }
@@ -838,8 +796,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -931,6 +888,249 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "mode": "continuous-BlPu"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 90,
+            "gradientMode": "opacity",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 0,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 50
+      },
+      "id": 2,
+      "options": {
+        "barRadius": 0.25,
+        "barWidth": 0.8,
+        "colorByField": "Device",
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "11.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  D.\"ModelName\" AS \"Device\",\r\n  COUNT(RH.\"Id\") AS \"ResearchCount\"\r\nFROM\r\n  public.\"ResearchHistories\" RH\r\n  JOIN public.\"Devices\" D ON RH.\"DeviceId\" = D.\"Id\"\r\nWHERE\r\n  $__timeFilter(RH.\"ResearchDate\")\r\nGROUP BY\r\n  D.\"ModelName\"\r\nORDER BY\r\n  \"ResearchCount\" DESC\r\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Количество использований",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Device": "Модель оборудования",
+              "ResearchCount": "Использовано в исследованиях"
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee518vfnb4sg0c"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "dashed+area"
+            }
+          },
+          "fieldMinMax": false,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 50
+      },
+      "id": 6,
+      "options": {
+        "barRadius": 0.25,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "11.3.1",
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\r\n  R.\"Name\" AS \"Research\",\r\n  AVG(EXTRACT(EPOCH FROM (RH.\"EndTime\" - RH.\"StartTime\"))/60) AS \"AverageResearchDurationMinutes\"\r\nFROM\r\n  public.\"ResearchHistories\" RH\r\n  JOIN public.\"Researches\" R ON RH.\"ResearchId\" = R.\"Id\"\r\nWHERE\r\n  RH.\"StartTime\" IS NOT NULL\r\n  AND RH.\"EndTime\" IS NOT NULL\r\n  AND $__timeFilter(RH.\"ResearchDate\")\r\nGROUP BY\r\n  R.\"Name\"\r\nORDER BY\r\n  \"AverageResearchDurationMinutes\" DESC\r\n",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Среднее время проведения исследования",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {},
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "AverageResearchDurationMinutes": "Среднее время (минуты)",
+              "Research": "Исследование"
+            }
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "ee518vfnb4sg0c"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
             "mode": "continuous-YlRd"
           },
           "custom": {
@@ -959,8 +1159,7 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
-                "value": null
+                "color": "green"
               },
               {
                 "color": "red",
@@ -972,10 +1171,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
+        "h": 9,
+        "w": 11,
         "x": 0,
-        "y": 50
+        "y": 61
       },
       "id": 4,
       "options": {
@@ -1043,127 +1242,6 @@
       ],
       "transparent": true,
       "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "grafana-postgresql-datasource",
-        "uid": "ee518vfnb4sg0c"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-BlPu"
-          },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 50
-      },
-      "id": 5,
-      "options": {
-        "barRadius": 0.25,
-        "barWidth": 0.97,
-        "fullHighlight": false,
-        "groupWidth": 0.7,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "none",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        },
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 0
-      },
-      "pluginVersion": "11.3.1",
-      "targets": [
-        {
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\r\n  R.\"Name\" AS \"Research\",\r\n  COUNT(RH.\"Id\") AS \"ResearchCount\"\r\nFROM\r\n  public.\"ResearchHistories\" RH\r\n  JOIN public.\"Researches\" R ON RH.\"ResearchId\" = R.\"Id\"\r\nWHERE\r\n  $__timeFilter(RH.\"ResearchDate\")\r\nGROUP BY\r\n  R.\"Name\"\r\nORDER BY\r\n  \"ResearchCount\" DESC\r\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Наиболее популярное исследование",
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "includeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Research": "Вид исследования",
-              "ResearchCount": "Количество исследований"
-            }
-          }
-        }
-      ],
-      "transparent": true,
-      "type": "barchart"
     }
   ],
   "preload": false,
@@ -1180,6 +1258,6 @@
   "timezone": "browser",
   "title": "Мониторинг МедОрганизации",
   "uid": "be519sqzwj2m8f",
-  "version": 34,
+  "version": 39,
   "weekStart": ""
 }

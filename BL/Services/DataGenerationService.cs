@@ -24,6 +24,7 @@ public class DataGenerationService : IDataGenerationService
         _deviceRepository = deviceRepository;
         _researchRepository = researchRepository;
     }
+
     public async Task GenerateSyntheticDataAsync(DateTimeOffset fromDate, DateTimeOffset toDate, int simulationsPerDay)
     {
         // Получаем список устройств и исследований из базы данных
